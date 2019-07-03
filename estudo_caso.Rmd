@@ -1,0 +1,365 @@
+---
+title: "Centralização e escalonamento de dados amostrais"
+subtitle: "Prós, contras e aplicação na Engenharia de Avaliações"
+author:
+- Luiz Fernando Palin Droubi^[SPU/SC, luiz.droubi@planejamento.gov.br]
+- Carlos Augusto Zilli^[UFSC/SC, carloszilli@hotmail.com]
+- Willian Zonato^[SPU/SC, willian.zonato@planejamento.gov.br]
+- Norberto Hochheim^[UFSC, hochheim@gmail.com]
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  pdf_document:
+    includes:
+      in_header: preamble.tex
+    keep_tex: yes
+    latex_engine: xelatex
+    number_sections: yes
+    toc: no
+  word_document: default
+  html_document:
+    fig_caption: yes
+    keep_md: yes
+classoption: a4paper, 12pt
+documentclass: article
+geometry: left=3.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm
+link-citations: yes
+linkcolor: red
+urlcolor: magenta
+citecolor: green
+csl: ABNT_UFPR_2011-Mendeley.csl
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", fig.path = "images/",
+                      dev = "CairoPNG", dpi = 300, fig.pos = "H", out.width = "70%",
+                      warning = FALSE, message = FALSE
+                      )
+library(papeR)
+library(summarytools)
+library(stargazer)
+library(knitr)
+library(mosaic)
+library(ggplot2)
+library(ggthemes)
+theme_set(theme_few())
+```
+
+```{r functions}
+brformat <- function(x, decimal.mark = ",", big.mark = ".", digits = 2, nsmall = 2, scientific = FALSE, ...) {
+  format(x, decimal.mark = decimal.mark, big.mark = big.mark, digits = digits, 
+         nsmall = nsmall, scientific = scientific, ...)
+}
+br <- function(...) {
+  function(x) brformat(x, ...)
+}
+reais <- function(prefix = "R$", ...) {
+  function(x) paste(prefix, brformat(x, ...), sep = "")
+}
+porcento <- function (x) {
+    if (length(x) == 0) 
+        return(character())
+    x <- plyr::round_any(x, scales:::precision(x)/100)
+    paste0(x * 100, "\\%")
+}
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+reciprocal_squared_trans <- function() scales::trans_new("reciprocal_squared", function(x) x^(-2), function(x) x^(-.5))
+```
+
+# ESTUDO DE CASO
+
+## Dados
+
+Para este estudo de caso foram utilizados os dados disponíveis em Hochheim [-@hochheim2005, 74].
+
+```{r, echo = FALSE}
+library(appraiseR)
+data("loteamento")
+loteamento$topo <- factor(loteamento$topo, 
+                          levels = c("plano", "aclive", "declive"))
+loteamento$pedologia <- factor(loteamento$pedologia, 
+                               levels = c("seco", "pantanoso"))
+loteamento$tipo <- factor(loteamento$tipo, 
+                          levels = c("venda", "oferta"))
+loteamento$valor[6] <- 44122.04
+loteamento$valor[9] <- 21570.77
+loteamento$valor[13] <- 19609.79
+loteamento$VU <- with(loteamento, valor/area)
+loteamento$VU <- ifelse(loteamento$tipo == "oferta", 
+                        .9*loteamento$VU, 
+                        loteamento$VU)
+mean_incl <- mean(loteamento$inclinacao)
+sd_incl <- sd(loteamento$inclinacao)
+```
+
+```{r, results='asis'}
+dfSummary(loteamento, plain.ascii = FALSE, style = "grid", 
+          graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp")
+```
+
+
+## Modelo inicial
+
+Para a modelagem correta da variável `inclinacao`, devem ser modelados os termos quadrático e cúbico da variável, o que possibilita que os efeitos do aclive e do declive tenham magnitudes diferentes. O termo linear da variável `inclinacao` não apresentou significância.
+
+De posse de todos os dados, sem qualquer transformação exceto a da variável `inclinacao`, por construção, foi primeiramente ajustado um primeiro modelo, apenas para o saneamento da amostra, em que foram utilizadas as variáveis `frente` e `profundidade` em detrimento da variável `area`.
+
+Os gráficos diagnósticos deste primeiro modelo podem ser vistos na figura \ref{fig:fit}.
+
+```{r fit, fig.cap="Modelo com todos os dados", out.width="30%", results='hide', fig.show='hold'}
+fit <- lm(VU ~ frente + profundidade + I(inclinacao^2) + I(inclinacao^3) +
+            pedologia, data = loteamento)
+mplot(fit, which = 1:6)
+```
+
+Como se pode notar na figura \ref{fig:fit}, os pontos 7 e 19 encontram-se bem afastados da média e foram excluídos do modelo final.
+
+```{r}
+fit <- update(fit, subset = -c(7, 19))
+```
+
+Segundo Hochheim, [-@hochheim2005, 74], o paradigma da região é um terreno plano e seco, com 15m de frente e 30m de profundidade.
+
+Uma vez obtido o modelo final saneado, então, foi ajustado outro modelo, onde adotou-se a centralização das variáveis `frente` e `profundidade`, de acordo com o lote paradigma. Já a variável `inclinacao`, por possuir os termos quadrático e cúbico, com vias de reduzir a multicolinearidade, foi centralizada e escalanoda, de maneira que a nova variável inclinação tem média zero e desvio-padrão igual a 1.
+
+Os dois modelos são correspondentes entre si, produzem as mesmas estimativas, porém apenas o modelo com as  variáveis centralizadas e escalonadas conforme explicitado possui grau I de especificação pela NBR 14.653-02 [-@NBR1465302], conforme se pode notar na tabela \ref{tab:fits}.
+
+```{r}
+loteamento$frente <- as.vector(scale(loteamento$frente, 
+                                     center = 15, scale = F))
+loteamento$profundidade <- as.vector(scale(loteamento$profundidade, 
+                                           center = 30, scale = F))
+loteamento$inclinacao <- as.vector(scale(loteamento$inclinacao, 
+                                           center = T, scale = T))
+```
+
+```{r fit1, fig.cap="Modelo saneado", out.width="30%", results='hide', fig.show='hold'}
+fit1 <- lm(VU ~ frente + profundidade + I(inclinacao^2) + I(inclinacao^3) +
+            pedologia, data = loteamento, subset = -c(7, 19))
+mplot(fit1, which = 1:6)
+```
+
+```{r fits, results='asis'}
+stargazer(fit, fit1, header = FALSE, label = "tab:fits",
+          title = "Comparacão dos modelos com e sem centralização",
+          ci = TRUE, ci.level = 0.80, decimal.mark = ",", digit.separator = ".",
+          report = "vctp*", star.cutoffs = c(0.30, 0.20, 0.10))
+```
+
+A tabela \ref{tab:tabela} mostra a tabela dos dados amostrais, com o acréscimo dos valores ajustados.
+
+```{r tabela}
+loteamento$yhat <- predict(fit1, newdata = loteamento)
+loteamento$frente <- loteamento$frente + 15
+loteamento$profundidade <- loteamento$profundidade + 30
+kable(loteamento, digits = 2, label = "tabela", 
+      format.args = list(big.mark = ".", decimal.mark = ","), booktabs = TRUE,
+      caption = "Dados do modelo com  valores ajustados.")
+```
+
+A figura \ref{fig:pplot} mostra o gráfico do poder de predição do modelo.
+
+```{r pplot, fig.cap = "Poder de predição do modelo."}
+power_plot(fit1)
+```
+
+
+## Coerência do modelo
+
+O modelo é coerente, conforme pode-se notar nas estimativas abaixo:
+
+
+
+```{r}
+### Paradigma
+p <- predict(fit1,
+             newdata = data.frame(frente = (15 - 15), 
+                                  profundidade = (30 - 30), 
+                                  inclinacao = (0 - mean_incl)/sd_incl, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Paradigma - Modelo Original
+p_orig <- predict(fit,
+             newdata = data.frame(frente = 15, 
+                                  profundidade = 30, 
+                                  inclinacao = 0, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Mais frente
+p1 <- predict(fit1,
+             newdata = data.frame(frente = (20 - 15), 
+                                  profundidade = (30 - 30), 
+                                  inclinacao = (0 - mean_incl)/sd_incl, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Mais frente - Modelo Original
+p1_orig <- predict(fit,
+             newdata = data.frame(frente = 20, 
+                                  profundidade = 30, 
+                                  inclinacao = 0, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Mais profundidade
+p2 <- predict(fit1,
+             newdata = data.frame(frente = (15 - 15), 
+                                  profundidade = (45 - 30), 
+                                  inclinacao = (0 - mean_incl)/sd_incl, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Mais profundidade - Modelo Original
+p2_orig <- predict(fit,
+             newdata = data.frame(frente = 15, 
+                                  profundidade = 45, 
+                                  inclinacao = 0, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Mais frente e mais profundidade
+p3 <- predict(fit1,
+             newdata = data.frame(frente = (20 - 15), 
+                                  profundidade = (45 - 30), 
+                                  inclinacao = (0 - mean_incl)/sd_incl, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Mais profundidade e profundidade - Modelo Original
+p3_orig <- predict(fit,
+             newdata = data.frame(frente = 20, 
+                                  profundidade = 45, 
+                                  inclinacao = 0, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Declive
+p4 <- predict(fit1,
+             newdata = data.frame(frente = (15 - 15), 
+                                  profundidade = (30 - 30), 
+                                  inclinacao = (-10 - mean_incl)/sd_incl, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Declive - Modelo Original
+p4_orig <- predict(fit,
+             newdata = data.frame(frente = 15, 
+                                  profundidade = 30, 
+                                  inclinacao = -10, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Aclive
+p5 <- predict(fit1,
+             newdata = data.frame(frente = (15 - 15), 
+                                  profundidade = (30 - 30), 
+                                  inclinacao = (10 - mean_incl)/sd_incl, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Aclive - Modelo Original
+p5_orig <- predict(fit,
+             newdata = data.frame(frente = 15, 
+                                  profundidade = 30, 
+                                  inclinacao = 10, 
+                                  pedologia = as.factor("seco")
+                                  )
+             )
+### Pantanoso
+p6 <- predict(fit1,
+             newdata = data.frame(frente = (15 - 15), 
+                                  profundidade = (30 - 30), 
+                                  inclinacao = (0 - mean_incl)/sd_incl, 
+                                  pedologia = as.factor("pantanoso")
+                                  )
+             )
+### Pantanoso - Modelo Original
+p6_orig <- predict(fit,
+             newdata = data.frame(frente = 15, 
+                                  profundidade = 30, 
+                                  inclinacao = 0, 
+                                  pedologia = as.factor("pantanoso")
+                                  )
+             )
+```
+
+Segundo o modelo, o lote paradigma vale R\$`r brformat(p)`/$m^2$, o que é muito próximo do intercepto do modelo final (R\$ `r brformat(coef(fit1)[1])`/$m^2$). Apenas para efeito de comparação, o mesmo lote paradigma avaliado de acordo com o modelo com os dados originais vale `r brformat(p_orig)`/$m^2$.
+
+Um lote com as mesmas características do lote paradigma, porém com 5m a mais de frente, segundo o modelo, vale R\$`r brformat(p1)`/$m^2$. No modelo original, vale `r brformat(p1_orig)`/$m^2$.
+
+Um lote com as mesmas características do lote paradigma, porém com 45m de profundidade, segundo o modelo, vale R\$`r brformat(p2)`/$m^2$. No modelo original, vale `r brformat(p2_orig)`/$m^2$.
+
+Um lote com as mesmas características do lote paradigma, porém com 20m de frente e 45m de profundidade, segundo o modelo, vale R\$`r brformat(p3)`/$m^2$. No modelo original, vale `r brformat(p3_orig)`/$m^2$.
+
+Um lote com as mesmas características do lote paradigma, porém com declive de 10%, segundo o modelo, vale R\$`r brformat(p4)`/$m^2$. No modelo original, vale `r brformat(p4_orig)`/$m^2$.
+
+Um lote com as mesmas características do lote paradigma, porém com aclive de 10%, segundo o modelo, vale R\$`r brformat(p5)`/$m^2$. No modelo original, vale `r brformat(p5_orig)`/$m^2$.
+
+Finalmente, um lote com as mesmas características do lote paradigma, porém em terreno pantanoso, segundo o modelo, vale R\$`r brformat(p6)`/$m^2$. No modelo original, vale `r brformat(p6_orig)`/$m^2$.
+
+## Estimativas
+
+Foram realizadas as estimativas dos terrenos proposto por Hochheim [-@hochheim2005, 79-80].
+
+### Terreno 1
+
+
+```{r}
+p1 <- 14*40*predict(fit1, 
+                    newdata = data.frame(frente = (14 - 15), 
+                                         profundidade = (40 - 30), 
+                                         inclinacao = (8 - mean_incl)/sd_incl, 
+                                         pedologia = as.factor("seco")),
+                    interval = "confidence", level = 0.80)
+p1p <- 14*40*predict(fit1, 
+                    newdata = data.frame(frente = (14 - 15), 
+                                         profundidade = (40 - 30), 
+                                         inclinacao = (8 - mean_incl)/sd_incl, 
+                                         pedologia = as.factor("seco")),
+                    interval = "prediction", level = 0.80)
+```
+
+Para o terreno 1, com 14m de frente, 40m de profundidade e aclive de 8%, foi estimado o valor central de R\$ `r brformat(p1[, "fit"])`, com limite inferior do intervalo de confiança em R\$ `r brformat(p1[, "lwr"])` e limite superior  do IC em R\$ `r brformat(p1[, "upr"])`. A amplitude do IC foi de `r porcento(amplitude(p1)/100)`., enquanto o intervalo de predição teve amplitude calculada em `r porcento(amplitude(p1p)/100)`.
+
+Em @hochheim2005, p. 79, segundo o método dos fatores multiplicativo, o valor estimado para o bem foi de R\$ 25.869,56, entre R\$ 24.551,50 e R\$ 27.182,39, ou seja, um IC com amplitude de 10,2%.
+
+Em @hochheim2005, p. 85, segundo o método dos fatores aditivo, o valor estimado para o bem foi de R\$ 25.825,18, entre R\$ 24.640,78 e R\$ 27.009,58, ou seja, um IC com amplitude de 9,2%.
+
+### Terreno 2
+
+```{r}
+p2 <- 16*50*predict(fit1, 
+                    newdata = data.frame(frente = (16 - 15), 
+                                         profundidade = (50 - 30), 
+                                         inclinacao = (-15 - mean_incl)/sd_incl, 
+                                         pedologia = as.factor("seco")), 
+                    interval = "confidence", level = 0.80)
+p2p <- 16*50*predict(fit1, 
+                    newdata = data.frame(frente = (16 - 15), 
+                                         profundidade = (50 - 30), 
+                                         inclinacao = (-15 - mean_incl)/sd_incl, 
+                                         pedologia = as.factor("seco")),
+                    interval = "prediction", level = 0.80)
+```
+
+Para o terreno 2, com 16m de frente, 50m de profundidade e declive de 15%, foi estimado o valor central de R\$ `r brformat(p2[, "fit"])`, com limite inferior do intervalo de confiança em R\$ `r brformat(p2[, "lwr"])` e limite superior  do IC em R\$ `r brformat(p2[, "upr"])`. A amplitude do IC foi de `r porcento(amplitude(p2)/100)`., enquanto o intervalo de predição teve amplitude calculada em `r porcento(amplitude(p2p)/100)`.
+
+Em @hochheim2005, p. 80, segundo o método dos fatores multiplicativo, o valor estimado para o bem foi de R\$ 32.168,78, entre R\$ 30.529,78 e R\$ 33.801,29, ou seja, um IC com amplitude de 10,2%.
+
+Em @hochheim2005, p. 86, segundo o método dos fatores aditivo, o valor estimado para o bem foi de R\$ 31.790,88, entre R\$ 30.332,88 e R\$ 33.248,88, ou seja, um IC com amplitude de 9,2%.
+
+# CONCLUSÃO
+
+O modelo com os dados centralizados possibilitou uma melhor interpretação do modelo, haja vista que o intercepto do modelo é aproximadamente o valor do metro quadrado do lote paradigma.
+
+A centralização e escalonamento da variável `inclinacao` possibilitou o enquadramento do modelo no Grau I de fundamentação da NBR 14.653-02.
+
+
+
+# REFERÊNCIAS {-}
+
