@@ -155,6 +155,7 @@ A tabela \ref{tab:tabela} mostra a tabela dos dados amostrais, com o acréscimo 
 loteamento$yhat <- predict(fit1, newdata = loteamento)
 loteamento$frente <- loteamento$frente + 15
 loteamento$profundidade <- loteamento$profundidade + 30
+loteamento$inclinacao <- loteamento$inclinacao*sd_incl + mean_incl
 kable(loteamento, digits = 2, label = "tabela", 
       format.args = list(big.mark = ".", decimal.mark = ","), booktabs = TRUE,
       caption = "Dados do modelo com  valores ajustados.")
