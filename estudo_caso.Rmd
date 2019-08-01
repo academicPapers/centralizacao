@@ -323,14 +323,37 @@ c. Fator topografia: $$C_t = 1 - \frac{173,1.(i_r)^2 + 1071,9.(i_r)^3}{54,27}$$
 d. Fator pedologia: $$C_{pedo} = 1 - \frac{21,11}{54,25} = 0,61$$
 
 | Terreno       |$C_f$    | $C_p$ | $C_t$ |$C_{pedo}$ |$C_{aval. total}$ |
-|:--------------|--------:|------:|------:|----------:|----------------:|
-| Paradigma     | 1,00    | 1,00  | 1,00  | 1,00      | 1,0             |
-| (1)+5m frente | 1,09    | 1,00  | 1,00  | 1,00      | 1,09            |
-| (2)+15m fundo | 1,00    | 0,95  | 1,00  | 1,00      | 0,95            |
-| (3)=(1)+(2)   | 1,09    | 0,95  | 1,00  | 1,00      | 1,04            |
-| (4)10% aclive | 1,00    | 1,00  | 0,95  | 1,00      | 0,95            |
-| (5)10% declive| 1,00    | 1,00  | 0,99  | 1,00      | 0,99            |
-| (6)Pantanoso  | 1,00    | 1,00  | 1,00  | 0,61      | 0,61            |
+|:--------------|--------:|------:|------:|----------:|-----------------:|
+| Paradigma     | 1,00    | 1,00  | 1,00  | 1,00      | 1,0              |
+| (1)+5m frente | 1,09    | 1,00  | 1,00  | 1,00      | 1,09             |
+| (2)+15m fundo | 1,00    | 0,95  | 1,00  | 1,00      | 0,95             |
+| (3)=(1)+(2)   | 1,09    | 0,95  | 1,00  | 1,00      | 1,04             |
+| (4)10% aclive | 1,00    | 1,00  | 0,95  | 1,00      | 0,95             |
+| (5)10% declive| 1,00    | 1,00  | 0,99  | 1,00      | 0,99             |
+| (6)Pantanoso  | 1,00    | 1,00  | 1,00  | 0,61      | 0,61             |
+
+## Estudo de caso n.º2
+
+```{r}
+jurere <- readxl::read_excel("jurere.xls")
+mean_dist_mar <- mean(jurere$DIST_MAR)
+sd_dist_mar <- sd(jurere$DIST_MAR)
+jurere$PROFUNDIDADE <- with(jurere, AREA/TESTADA)
+jurere$AREA <- as.vector(scale(jurere$AREA, center = 600, scale = FALSE))
+jurere$TESTADA <- as.vector(scale(jurere$TESTADA, center = 20, scale = FALSE))
+jurere$PROFUNDIDADE <- as.vector(scale(jurere$PROFUNDIDADE, center = 30, scale = FALSE))
+jurere$DIST_MAR <- as.vector(scale(jurere$DIST_MAR, center = TRUE, scale = TRUE))
+fit <- lm(VU ~  I(AREA^2) + TESTADA + DIST_MAR + as.factor(PAVIMENTOS), 
+          data = jurere, subset = -27)
+summary(fit)
+```
+
+```{r}
+newdata = data.frame(AREA = (600 - 600), TESTADA = (20 - 20), 
+                     PROFUNDIDADE = (30-30), DIST_MAR = (1094 - mean_dist_mar)/sd_dist_mar, 
+                     PAVIMENTOS = as.factor(2))
+predict(fit, newdata = newdata)
+```
 
 # CONCLUSÃO
 
