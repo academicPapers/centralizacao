@@ -6,7 +6,7 @@ author:
 - Carlos Augusto Zilli^[UFSC/SC, carloszilli@hotmail.com]
 - Willian Zonato^[SPU/SC, willian.zonato@planejamento.gov.br]
 - Norberto Hochheim^[UFSC, hochheim@gmail.com]
-date: "03/07/2019"
+date: "04/07/2019"
 output:
   html_document:
     fig_caption: yes
@@ -253,7 +253,7 @@ Foram realizadas as estimativas dos terrenos proposto por Hochheim [-@hochheim20
 
 
 
-Para o terreno 1, com 14m de frente, 40m de profundidade e aclive de 8%, foi estimado o valor central de R\$ 28.037,49, com limite inferior do intervalo de confiança em R\$ 26.103,36 e limite superior  do IC em R\$ 29.971,61. A amplitude do IC foi de 13.8\%., enquanto o intervalo de predição teve amplitude calculada em 35.6\%.
+Para o terreno 1, com 14m de frente, 40m de profundidade e aclive de 8%, foi estimado o valor central de R\$ 28.037,49 (R\$50,07/$m^2$), com limite inferior do intervalo de confiança em R\$ 26.103,36 e limite superior  do IC em R\$ 29.971,61. A amplitude do IC foi de 13.8\%., enquanto o intervalo de predição teve amplitude calculada em 35.6\%.
 
 Em @hochheim2005, p. 79, segundo o método dos fatores multiplicativo, o valor estimado para o bem foi de R\$ 25.869,56, entre R\$ 24.551,50 e R\$ 27.182,39, ou seja, um IC com amplitude de 10,2%.
 
@@ -263,7 +263,7 @@ Em @hochheim2005, p. 85, segundo o método dos fatores aditivo, o valor estimado
 
 
 
-Para o terreno 2, com 16m de frente, 50m de profundidade e declive de 15%, foi estimado o valor central de R\$ 41.249,13, com limite inferior do intervalo de confiança em R\$ 35.718,34 e limite superior  do IC em R\$ 46.779,92. A amplitude do IC foi de 26.8\%., enquanto o intervalo de predição teve amplitude calculada em 41.7\%.
+Para o terreno 2, com 16m de frente, 50m de profundidade e declive de 15%, foi estimado o valor central de R\$ 41.249,13 (R\$51,56/$m^2$), com limite inferior do intervalo de confiança em R\$ 35.718,34 e limite superior  do IC em R\$ 46.779,92. A amplitude do IC foi de 26.8\%., enquanto o intervalo de predição teve amplitude calculada em 41.7\%.
 
 Em @hochheim2005, p. 80, segundo o método dos fatores multiplicativo, o valor estimado para o bem foi de R\$ 32.168,78, entre R\$ 30.529,78 e R\$ 33.801,29, ou seja, um IC com amplitude de 10,2%.
 

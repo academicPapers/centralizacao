@@ -21,7 +21,7 @@
 \usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\usepackage[left=3.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage[left=2cm,right=2cm,top=2.5cm,bottom=2.5cm]{geometry}
 \usepackage{hyperref}
 \PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
 \hypersetup{unicode=true,
@@ -92,7 +92,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{03/07/2019}
+    \date{01/08/2019}
 
 \usepackage[brazil]{babel}
 \usepackage{graphicx}
@@ -100,6 +100,7 @@
 \usepackage{subfig}
 \usepackage{caption}
 \usepackage{lastpage}
+\usepackage{lscape}
 \setlength{\parindent}{1.25cm} % Default is 15pt.
 \usepackage{indentfirst}
 \usepackage{fontspec} % para Arial
@@ -307,10 +308,10 @@ IIIIII\strut
 inclinacao\\
 {[}numeric{]}\strut
 \end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\raggedright
-Mean (sd) : 1 (9)\\
+Mean (sd) : 0 (0.1)\\
 min \textless{} med \textless{} max:\\
--15 \textless{} 0 \textless{} 18\\
-IQR (CV) : 7.5 (9.5)\strut
+-0.2 \textless{} 0 \textless{} 0.2\\
+IQR (CV) : 0.1 (9.5)\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright
 11 distinct values\strut
 \end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright
@@ -369,20 +370,15 @@ IQR (CV) : 21 (0.3)\strut
 \hypertarget{modelo-inicial}{%
 \subsection{Modelo inicial}\label{modelo-inicial}}
 
-Para a modelagem correta da variável \texttt{inclinacao}, devem ser
-modelados os termos quadrático e cúbico da variável, o que possibilita
-que os efeitos do aclive e do declive tenham magnitudes diferentes. O
-termo linear da variável \texttt{inclinacao} não apresentou
-significância.
-
 De posse de todos os dados, sem qualquer transformação exceto a da
-variável \texttt{inclinacao}, por construção, foi primeiramente ajustado
+variável \texttt{inclinacao}, por construção, foi inicialmente ajustado
 um primeiro modelo, apenas para o saneamento da amostra, em que foram
 utilizadas as variáveis \texttt{frente} e \texttt{profundidade} em
 detrimento da variável \texttt{area}.
 
 Os gráficos diagnósticos deste primeiro modelo podem ser vistos na
-figura \ref{fig:fit}.
+figura \ref{fig:fit}. Como se pode ver nesta figura, os pontos 7 e 19
+encontram-se bem afastados da média e foram excluídos do modelo final.
 
 \begin{figure}[H]
 
@@ -392,9 +388,6 @@ figura \ref{fig:fit}.
 
 \caption{Modelo com todos os dados}\label{fig:fit}
 \end{figure}
-
-Como se pode notar na figura \ref{fig:fit}, os pontos 7 e 19
-encontram-se bem afastados da média e foram excluídos do modelo final.
 
 Segundo Hochheim, (\protect\hyperlink{ref-hochheim2005}{2005}, p. 74), o
 paradigma da região é um terreno plano e seco, com 15m de frente e 30m
@@ -424,7 +417,7 @@ notar na tabela \ref{tab:fits}.
 \end{figure}
 
 \begin{table}[!htbp] \centering 
-  \caption{Comparacão dos modelos com e sem centralização} 
+  \caption{Comparacão dos modelos com e sem centralização e escalonamento.} 
   \label{tab:fits} 
 \begin{tabular}{@{\extracolsep{5pt}}lcc} 
 \\[-1.8ex]\hline 
@@ -434,29 +427,35 @@ notar na tabela \ref{tab:fits}.
 \\[-1.8ex] & \multicolumn{2}{c}{VU} \\ 
 \\[-1.8ex] & (1) & (2)\\ 
 \hline \\[-1.8ex] 
+ Constant & 44,813 & 54,265 \\ 
+  & (9,368) & (2,584) \\ 
+  & t = 4,784 & t = 21,000 \\ 
+  & p = 0,0005$^{***}$ & p = 0,000$^{***}$ \\ 
+  & & \\ 
  frente & 0,993 & 0,997 \\ 
+  & (0,508) & (0,508) \\ 
   & t = 1,954 & t = 1,960 \\ 
   & p = 0,075$^{***}$ & p = 0,074$^{***}$ \\ 
   & & \\ 
  profundidade & $-$0,179 & $-$0,178 \\ 
+  & (0,146) & (0,146) \\ 
   & t = $-$1,229 & t = $-$1,220 \\ 
   & p = 0,243$^{*}$ & p = 0,246$^{*}$ \\ 
   & & \\ 
- I(inclinacao$\hat{\mkern6mu}$2) & $-$0,017 & $-$1,617 \\ 
+ I(inclinacao$\hat{\mkern6mu}$2) & $-$173,083 & $-$1,617 \\ 
+  & (170,248) & (1,295) \\ 
   & t = $-$1,017 & t = $-$1,249 \\ 
   & p = 0,330 & p = 0,236$^{*}$ \\ 
   & & \\ 
- I(inclinacao$\hat{\mkern6mu}$3) & $-$0,001 & $-$0,889 \\ 
+ I(inclinacao$\hat{\mkern6mu}$3) & $-$1.071,862 & $-$0,889 \\ 
+  & (771,291) & (0,533) \\ 
   & t = $-$1,390 & t = $-$1,667 \\ 
   & p = 0,190$^{**}$ & p = 0,122$^{**}$ \\ 
   & & \\ 
  pedologiapantanoso & $-$21,201 & $-$21,111 \\ 
+  & (3,727) & (3,701) \\ 
   & t = $-$5,689 & t = $-$5,703 \\ 
   & p = 0,0002$^{***}$ & p = 0,0001$^{***}$ \\ 
-  & & \\ 
- Constant & 44,813 & 54,265 \\ 
-  & t = 4,784 & t = 21,000 \\ 
-  & p = 0,0005$^{***}$ & p = 0,000$^{***}$ \\ 
   & & \\ 
 \hline \\[-1.8ex] 
 Observations & 18 & 18 \\ 
@@ -477,53 +476,53 @@ acréscimo dos valores ajustados.
 \caption{Dados do modelo com valores ajustados.}\tabularnewline
 \toprule
 valor & area & tipo & frente & profundidade & topo & inclinacao &
-pedologia & VU & yhat\tabularnewline
+pedologia & VU & \(\widehat{VU}\)\tabularnewline
 \midrule
 \endfirsthead
 \toprule
 valor & area & tipo & frente & profundidade & topo & inclinacao &
-pedologia & VU & yhat\tabularnewline
+pedologia & VU & \(\widehat{VU}\)\tabularnewline
 \midrule
 \endhead
-25.000,00 & 450 & venda & 15 & 30 & plano & -0,12 & seco & 55,56 &
+25.000,00 & 450 & venda & 15 & 30 & plano & 0,00 & seco & 55,56 &
 54,25\tabularnewline
-30.000,00 & 525 & oferta & 15 & 35 & aclive & -0,06 & seco & 51,43 &
+30.000,00 & 525 & oferta & 15 & 35 & aclive & 0,05 & seco & 51,43 &
 52,97\tabularnewline
-28.500,00 & 650 & venda & 13 & 50 & declive & -0,22 & seco & 43,85 &
+28.500,00 & 650 & venda & 13 & 50 & declive & -0,08 & seco & 43,85 &
 47,98\tabularnewline
-29.500,00 & 1.020 & oferta & 17 & 60 & plano & -0,12 & pantanoso & 26,03
+29.500,00 & 1.020 & oferta & 17 & 60 & plano & 0,00 & pantanoso & 26,03
 & 29,78\tabularnewline
-19.000,00 & 360 & oferta & 12 & 30 & declive & -0,30 & seco & 47,50 &
+19.000,00 & 360 & oferta & 12 & 30 & declive & -0,15 & seco & 47,50 &
 51,14\tabularnewline
-44.122,04 & 1.200 & venda & 20 & 60 & aclive & 0,10 & seco & 36,77 &
+44.122,04 & 1.200 & venda & 20 & 60 & aclive & 0,18 & seco & 36,77 &
 42,06\tabularnewline
-40.000,00 & 550 & oferta & 10 & 55 & declive & -0,24 & seco & 65,45 &
+40.000,00 & 550 & oferta & 10 & 55 & declive & -0,10 & seco & 65,45 &
 44,03\tabularnewline
-18.000,00 & 520 & oferta & 13 & 40 & declive & -0,14 & pantanoso & 31,15
+18.000,00 & 520 & oferta & 13 & 40 & declive & -0,02 & pantanoso & 31,15
 & 29,23\tabularnewline
-21.570,77 & 450 & venda & 15 & 30 & aclive & 0,10 & seco & 47,94 &
+21.570,77 & 450 & venda & 15 & 30 & aclive & 0,18 & seco & 47,94 &
 42,43\tabularnewline
-23.000,00 & 414 & oferta & 18 & 30 & aclive & -0,03 & seco & 50,00 &
+23.000,00 & 414 & oferta & 18 & 30 & aclive & 0,07 & seco & 50,00 &
 56,26\tabularnewline
-25.500,00 & 400 & venda & 20 & 35 & declive & -0,29 & seco & 63,75 &
+25.500,00 & 400 & venda & 20 & 35 & declive & -0,14 & seco & 63,75 &
 57,97\tabularnewline
-12.500,00 & 450 & venda & 15 & 30 & declive & -0,14 & pantanoso & 27,78
+12.500,00 & 450 & venda & 15 & 30 & declive & -0,02 & pantanoso & 27,78
 & 33,01\tabularnewline
-19.609,79 & 595 & venda & 17 & 35 & plano & -0,12 & pantanoso & 32,96 &
+19.609,79 & 595 & venda & 17 & 35 & plano & 0,00 & pantanoso & 32,96 &
 34,24\tabularnewline
-30.500,00 & 506 & oferta & 22 & 30 & plano & -0,12 & seco & 54,25 &
+30.500,00 & 506 & oferta & 22 & 30 & plano & 0,00 & seco & 54,25 &
 61,22\tabularnewline
-25.000,00 & 480 & oferta & 12 & 40 & aclive & 0,03 & seco & 46,88 &
+25.000,00 & 480 & oferta & 12 & 40 & aclive & 0,12 & seco & 46,88 &
 45,41\tabularnewline
-29.500,00 & 440 & venda & 20 & 35 & plano & -0,12 & seco & 67,05 &
+29.500,00 & 440 & venda & 20 & 35 & plano & 0,00 & seco & 67,05 &
 58,34\tabularnewline
-24.500,00 & 420 & venda & 14 & 30 & plano & -0,12 & seco & 58,33 &
+24.500,00 & 420 & venda & 14 & 30 & plano & 0,00 & seco & 58,33 &
 53,25\tabularnewline
-18.000,00 & 480 & oferta & 16 & 30 & plano & -0,12 & pantanoso & 33,75 &
+18.000,00 & 480 & oferta & 16 & 30 & plano & 0,00 & pantanoso & 33,75 &
 34,13\tabularnewline
-12.500,00 & 525 & venda & 15 & 35 & aclive & 0,01 & seco & 23,81 &
+12.500,00 & 525 & venda & 15 & 35 & aclive & 0,10 & seco & 23,81 &
 50,84\tabularnewline
-32.000,00 & 810 & venda & 18 & 60 & plano & -0,12 & pantanoso & 39,51 &
+32.000,00 & 810 & venda & 18 & 60 & plano & 0,00 & pantanoso & 39,51 &
 30,78\tabularnewline
 \bottomrule
 \end{longtable}
@@ -551,72 +550,82 @@ efeito de comparação, o mesmo lote paradigma avaliado de acordo com o
 modelo com os dados originais vale 54,33/\(m^2\).
 
 Um lote com as mesmas características do lote paradigma, porém com 5m a
-mais de frente, segundo o modelo, vale R\$59,23/\(m^2\). No modelo
-original, vale 59,30/\(m^2\).
+mais de frente, segundo o modelo, vale R\$59,23/\(m^2\) (\(\approx\)
+54,27 + 0,997.5m). No modelo original, vale 59,30/\(m^2\).
 
 Um lote com as mesmas características do lote paradigma, porém com 45m
-de profundidade, segundo o modelo, vale R\$51,57/\(m^2\). No modelo
-original, vale 51,64/\(m^2\).
+de profundidade, segundo o modelo, vale R\$51,57/\(m^2\) (\(\approx\)
+54,27 -0,178.15m). No modelo original, vale 51,64/\(m^2\).
 
 Um lote com as mesmas características do lote paradigma, porém com 20m
 de frente e 45m de profundidade, segundo o modelo, vale
 R\$56,56/\(m^2\). No modelo original, vale 56,61/\(m^2\).
 
 Um lote com as mesmas características do lote paradigma, porém com
-declive de 10\%, segundo o modelo, vale R\$53,47/\(m^2\). No modelo
-original, vale 53,67/\(m^2\).
+declive de 10\%, segundo o modelo, vale R\$53,47/\(m^2\) . No modelo
+original, vale 53,67/\(m^2\) (\(\approx\) 54,27 -173,08.\((-0,10)^2\)
+-1.071,86.\((-0,10)^3\) = 54,27 -1,73 + 1,07).
 
 Um lote com as mesmas características do lote paradigma, porém com
-aclive de 10\%, segundo o modelo, vale R\$51,73/\(m^2\). No modelo
-original, vale 51,53/\(m^2\).
+aclive de 10\%, segundo o modelo, vale R\$51,73/\(m^2\) . No modelo
+original, vale 51,53/\(m^2\) (\(\approx\) 54,27 -173,08.\(0,10^2\)
+-1.071,86.\(0,10^3\) = 54,27 -1,73 -1,07).
 
 Finalmente, um lote com as mesmas características do lote paradigma,
-porém em terreno pantanoso, segundo o modelo, vale R\$33,14/\(m^2\). No
-modelo original, vale 33,13/\(m^2\).
+porém em terreno pantanoso, segundo o modelo, vale R\$33,14/\(m^2\)
+(\(\approx\) 54,27 -21,11). No modelo original, vale 33,13/\(m^2\).
 
-\hypertarget{estimativas}{%
-\subsection{Estimativas}\label{estimativas}}
+A tabela abaixo resume a influência de cada variável na composição do
+valor unitário total:
 
-Foram realizadas as estimativas dos terrenos proposto por Hochheim
-(\protect\hyperlink{ref-hochheim2005}{2005}, pp. 79--80).
+\begin{longtable}[]{@{}lrrrrrr@{}}
+\toprule
+Terreno & \(V_0\) & \(Frente\) & \(Profundidade\) & \(Inclinacao\) &
+\(Pedologia\) & \(VU\)\tabularnewline
+\midrule
+\endhead
+Paradigma & 54,27 & 0 & 0 & 0 & 0 & 54,27\tabularnewline
+(1)+5m frente & 54,27 & 4,98 & 0 & 0 & 0 & 59,25\tabularnewline
+(2)+15m fundo & 54,27 & 0 & -2,68 & 0 & 0 & 51,59\tabularnewline
+(3)=(1)+(2) & 54,27 & 4,98 & -2,68 & 0 & 0 & 56,60\tabularnewline
+(4)10\% aclive & 54,27 & 0 & 0 & -2,80 & 0 & 51,47\tabularnewline
+(5)10\% declive & 54,27 & 0 & 0 & -0,66 & 0 & 53,61\tabularnewline
+(6)Pantanoso & 54,27 & 0 & 0 & 0 & -21,11 & 33,16\tabularnewline
+\bottomrule
+\end{longtable}
 
-\hypertarget{terreno-1}{%
-\subsubsection{Terreno 1}\label{terreno-1}}
+Pode-se então, baseado nestes modelos, adaptar, para posteriormente
+serem utilizados através do método de avaliação por fatores, o seguinte:
 
-Para o terreno 1, com 14m de frente, 40m de profundidade e aclive de
-8\%, foi estimado o valor central de R\$ 28.037,49, com limite inferior
-do intervalo de confiança em R\$ 26.103,36 e limite superior do IC em
-R\$ 29.971,61. A amplitude do IC foi de 13.8\%., enquanto o intervalo de
-predição teve amplitude calculada em 35.6\%.
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Fator frente: \[C_f = 1 + \frac{0,997}{54,27}*(F_p - F_r)\]
+\item
+  Fator profundidade: \[C_p = 1 - \frac{0,178}{54,27}*(P_e - P_r)\]
+\item
+  Fator topografia:
+  \[C_t = 1 - \frac{173,1.(i_r)^2 + 1071,9.(i_r)^3}{54,27}\]
+\item
+  Fator pedologia: \[C_{pedo} = 1 - \frac{21,11}{54,25} = 0,61\]
+\end{enumerate}
 
-Em HOCHHEIM (\protect\hyperlink{ref-hochheim2005}{2005}), p.~79, segundo
-o método dos fatores multiplicativo, o valor estimado para o bem foi de
-R\$ 25.869,56, entre R\$ 24.551,50 e R\$ 27.182,39, ou seja, um IC com
-amplitude de 10,2\%.
-
-Em HOCHHEIM (\protect\hyperlink{ref-hochheim2005}{2005}), p.~85, segundo
-o método dos fatores aditivo, o valor estimado para o bem foi de R\$
-25.825,18, entre R\$ 24.640,78 e R\$ 27.009,58, ou seja, um IC com
-amplitude de 9,2\%.
-
-\hypertarget{terreno-2}{%
-\subsubsection{Terreno 2}\label{terreno-2}}
-
-Para o terreno 2, com 16m de frente, 50m de profundidade e declive de
-15\%, foi estimado o valor central de R\$ 41.249,13, com limite inferior
-do intervalo de confiança em R\$ 35.718,34 e limite superior do IC em
-R\$ 46.779,92. A amplitude do IC foi de 26.8\%., enquanto o intervalo de
-predição teve amplitude calculada em 41.7\%.
-
-Em HOCHHEIM (\protect\hyperlink{ref-hochheim2005}{2005}), p.~80, segundo
-o método dos fatores multiplicativo, o valor estimado para o bem foi de
-R\$ 32.168,78, entre R\$ 30.529,78 e R\$ 33.801,29, ou seja, um IC com
-amplitude de 10,2\%.
-
-Em HOCHHEIM (\protect\hyperlink{ref-hochheim2005}{2005}), p.~86, segundo
-o método dos fatores aditivo, o valor estimado para o bem foi de R\$
-31.790,88, entre R\$ 30.332,88 e R\$ 33.248,88, ou seja, um IC com
-amplitude de 9,2\%.
+\begin{longtable}[]{@{}lrrrrr@{}}
+\toprule
+Terreno & \(C_f\) & \(C_p\) & \(C_t\) & \(C_{pedo}\) &
+\(C_{aval. total}\)\tabularnewline
+\midrule
+\endhead
+Paradigma & 1,00 & 1,00 & 1,00 & 1,00 & 1,0\tabularnewline
+(1)+5m frente & 1,09 & 1,00 & 1,00 & 1,00 & 1,09\tabularnewline
+(2)+15m fundo & 1,00 & 0,95 & 1,00 & 1,00 & 0,95\tabularnewline
+(3)=(1)+(2) & 1,09 & 0,95 & 1,00 & 1,00 & 1,04\tabularnewline
+(4)10\% aclive & 1,00 & 1,00 & 0,95 & 1,00 & 0,95\tabularnewline
+(5)10\% declive & 1,00 & 1,00 & 0,99 & 1,00 & 0,99\tabularnewline
+(6)Pantanoso & 1,00 & 1,00 & 1,00 & 0,61 & 0,61\tabularnewline
+\bottomrule
+\end{longtable}
 
 \hypertarget{conclusao}{%
 \section{CONCLUSÃO}\label{conclusao}}
@@ -628,6 +637,17 @@ aproximadamente o valor do metro quadrado do lote paradigma.
 A centralização e escalonamento da variável \texttt{inclinacao}
 possibilitou o enquadramento do modelo no Grau I de fundamentação da NBR
 14.653-02.
+
+O cálculo das estimativas através do método científico (modelo de
+regressão linear), possibilitou o correto entendimento da influência da
+variável \texttt{inclinacao} que, neste caso, teve comportamento diverso
+ao do esperado pelo método de fatores. Neste, presume-se que a variável
+\texttt{inclinacao} deprecie mais quando em aclive do que em situação de
+declive, porém, através da análise do modelo de regressão linear, o
+comportamento foi o contrário do esperado. Cabe salientar que, caso o
+coeficiente do termo cúbico tivesse resultado positivo, a variável
+\texttt{inclinacao} teria comportamento similar ao comportamento
+esperado pelo método de fatores.
 
 \hypertarget{referencias}{%
 \section*{REFERÊNCIAS}\label{referencias}}

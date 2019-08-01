@@ -8,10 +8,6 @@ author:
 - Norberto Hochheim^[UFSC, hochheim@gmail.com]
 date: "`r format(Sys.Date(), '%d/%m/%Y')`"
 output:
-  html_document:
-    fig_caption: yes
-    keep_md: yes
-  word_document: default
   pdf_document:
     includes:
       in_header: preamble.tex
@@ -19,9 +15,13 @@ output:
     latex_engine: xelatex
     number_sections: yes
     toc: no
+  word_document: default
+  html_document:
+    fig_caption: yes
+    keep_md: yes
 classoption: a4paper, 12pt
 documentclass: article
-geometry: left=3.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm
+geometry: left=2cm,right=2cm,top=2.5cm,bottom=2.5cm
 link-citations: yes
 linkcolor: red
 urlcolor: magenta
@@ -46,7 +46,7 @@ theme_set(theme_few())
 ```
 
 ```{r functions}
-brformat <- function(x, decimal.mark = ",", big.mark = ".", digits = 2, nsmall = 2, scientific = FALSE, ...) {
+brformat <- function(x, digits = 2, nsmall = 2, decimal.mark = ",", big.mark = ".", scientific = FALSE, ...) {
   format(x, decimal.mark = decimal.mark, big.mark = big.mark, digits = digits, 
          nsmall = nsmall, scientific = scientific, ...)
 }
@@ -84,6 +84,7 @@ loteamento$pedologia <- factor(loteamento$pedologia,
                                levels = c("seco", "pantanoso"))
 loteamento$tipo <- factor(loteamento$tipo, 
                           levels = c("venda", "oferta"))
+loteamento$inclinacao <- .01*loteamento$inclinacao
 loteamento$valor[6] <- 44122.04
 loteamento$valor[9] <- 21570.77
 loteamento$valor[13] <- 19609.79
@@ -103,11 +104,9 @@ dfSummary(loteamento, plain.ascii = FALSE, style = "grid",
 
 ## Modelo inicial
 
-Para a modelagem correta da variável `inclinacao`, devem ser modelados os termos quadrático e cúbico da variável, o que possibilita que os efeitos do aclive e do declive tenham magnitudes diferentes. O termo linear da variável `inclinacao` não apresentou significância.
+De posse de todos os dados, sem qualquer transformação exceto a da variável `inclinacao`, por construção, foi inicialmente ajustado um primeiro modelo, apenas para o saneamento da amostra, em que foram utilizadas as variáveis `frente` e `profundidade` em detrimento da variável `area`.
 
-De posse de todos os dados, sem qualquer transformação exceto a da variável `inclinacao`, por construção, foi primeiramente ajustado um primeiro modelo, apenas para o saneamento da amostra, em que foram utilizadas as variáveis `frente` e `profundidade` em detrimento da variável `area`.
-
-Os gráficos diagnósticos deste primeiro modelo podem ser vistos na figura \ref{fig:fit}.
+Os gráficos diagnósticos deste primeiro modelo podem ser vistos na figura \ref{fig:fit}. Como se pode ver nesta figura, os pontos 7 e 19 encontram-se bem afastados da média e foram excluídos do modelo final.
 
 ```{r fit, fig.cap="Modelo com todos os dados", out.width="30%", results='hide', fig.show='hold'}
 fit <- lm(VU ~ frente + profundidade + I(inclinacao^2) + I(inclinacao^3) +
@@ -115,7 +114,6 @@ fit <- lm(VU ~ frente + profundidade + I(inclinacao^2) + I(inclinacao^3) +
 mplot(fit, which = 1:6)
 ```
 
-Como se pode notar na figura \ref{fig:fit}, os pontos 7 e 19 encontram-se bem afastados da média e foram excluídos do modelo final.
 
 ```{r}
 fit <- update(fit, subset = -c(7, 19))
@@ -144,9 +142,10 @@ mplot(fit1, which = 1:6)
 
 ```{r fits, results='asis'}
 stargazer(fit, fit1, header = FALSE, label = "tab:fits",
-          title = "Comparacão dos modelos com e sem centralização",
-          ci = TRUE, ci.level = 0.80, decimal.mark = ",", digit.separator = ".",
-          report = "vctp*", star.cutoffs = c(0.30, 0.20, 0.10))
+          title = "Comparacão dos modelos com e sem centralização e escalonamento.",
+          decimal.mark = ",", digit.separator = ".",
+          intercept.bottom = FALSE, intercept.top = TRUE,
+          report = "vcstp*", star.cutoffs = c(0.30, 0.20, 0.10))
 ```
 
 A tabela \ref{tab:tabela} mostra a tabela dos dados amostrais, com o acréscimo dos valores ajustados.
@@ -158,7 +157,8 @@ loteamento$profundidade <- loteamento$profundidade + 30
 loteamento$inclinacao <- loteamento$inclinacao*sd_incl + mean_incl
 kable(loteamento, digits = 2, label = "tabela", 
       format.args = list(big.mark = ".", decimal.mark = ","), booktabs = TRUE,
-      caption = "Dados do modelo com  valores ajustados.")
+      caption = "Dados do modelo com  valores ajustados.",
+      col.names = c(colnames(loteamento)[-10], "$\\widehat{VU}$"))
 ```
 
 A figura \ref{fig:pplot} mostra o gráfico do poder de predição do modelo.
@@ -243,7 +243,7 @@ p3_orig <- predict(fit,
 p4 <- predict(fit1,
              newdata = data.frame(frente = (15 - 15), 
                                   profundidade = (30 - 30), 
-                                  inclinacao = (-10 - mean_incl)/sd_incl, 
+                                  inclinacao = (-.1 - mean_incl)/sd_incl, 
                                   pedologia = as.factor("seco")
                                   )
              )
@@ -251,7 +251,7 @@ p4 <- predict(fit1,
 p4_orig <- predict(fit,
              newdata = data.frame(frente = 15, 
                                   profundidade = 30, 
-                                  inclinacao = -10, 
+                                  inclinacao = -.1, 
                                   pedologia = as.factor("seco")
                                   )
              )
@@ -259,7 +259,7 @@ p4_orig <- predict(fit,
 p5 <- predict(fit1,
              newdata = data.frame(frente = (15 - 15), 
                                   profundidade = (30 - 30), 
-                                  inclinacao = (10 - mean_incl)/sd_incl, 
+                                  inclinacao = (.1 - mean_incl)/sd_incl, 
                                   pedologia = as.factor("seco")
                                   )
              )
@@ -267,7 +267,7 @@ p5 <- predict(fit1,
 p5_orig <- predict(fit,
              newdata = data.frame(frente = 15, 
                                   profundidade = 30, 
-                                  inclinacao = 10, 
+                                  inclinacao = .1, 
                                   pedologia = as.factor("seco")
                                   )
              )
@@ -291,68 +291,46 @@ p6_orig <- predict(fit,
 
 Segundo o modelo, o lote paradigma vale R\$`r brformat(p)`/$m^2$, o que é muito próximo do intercepto do modelo final (R\$ `r brformat(coef(fit1)[1])`/$m^2$). Apenas para efeito de comparação, o mesmo lote paradigma avaliado de acordo com o modelo com os dados originais vale `r brformat(p_orig)`/$m^2$.
 
-Um lote com as mesmas características do lote paradigma, porém com 5m a mais de frente, segundo o modelo, vale R\$`r brformat(p1)`/$m^2$. No modelo original, vale `r brformat(p1_orig)`/$m^2$.
+Um lote com as mesmas características do lote paradigma, porém com 5m a mais de frente, segundo o modelo, vale R\$`r brformat(p1)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` + `r brformat(coef(fit1)[2], digits = 3)`.5m). No modelo original, vale `r brformat(p1_orig)`/$m^2$.
 
-Um lote com as mesmas características do lote paradigma, porém com 45m de profundidade, segundo o modelo, vale R\$`r brformat(p2)`/$m^2$. No modelo original, vale `r brformat(p2_orig)`/$m^2$.
+Um lote com as mesmas características do lote paradigma, porém com 45m de profundidade, segundo o modelo, vale R\$`r brformat(p2)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit1)[3], digits = 3)`.15m). No modelo original, vale `r brformat(p2_orig)`/$m^2$.
 
 Um lote com as mesmas características do lote paradigma, porém com 20m de frente e 45m de profundidade, segundo o modelo, vale R\$`r brformat(p3)`/$m^2$. No modelo original, vale `r brformat(p3_orig)`/$m^2$.
 
-Um lote com as mesmas características do lote paradigma, porém com declive de 10%, segundo o modelo, vale R\$`r brformat(p4)`/$m^2$. No modelo original, vale `r brformat(p4_orig)`/$m^2$.
+Um lote com as mesmas características do lote paradigma, porém com declive de 10%, segundo o modelo, vale R\$`r brformat(p4)`/$m^2$ . No modelo original, vale `r brformat(p4_orig)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit)[4], digits = 3)`.$(-0,10)^2$ `r brformat(coef(fit)[5], digits = 3)`.$(-0,10)^3$ = `r brformat(coef(fit1)[1])` `r brformat((-.1)^2*coef(fit)[4], digits = 3)` + `r brformat((-.1)^3*coef(fit)[5], digits = 3)`).
 
-Um lote com as mesmas características do lote paradigma, porém com aclive de 10%, segundo o modelo, vale R\$`r brformat(p5)`/$m^2$. No modelo original, vale `r brformat(p5_orig)`/$m^2$.
+Um lote com as mesmas características do lote paradigma, porém com aclive de 10%, segundo o modelo, vale R\$`r brformat(p5)`/$m^2$ . No modelo original, vale `r brformat(p5_orig)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit)[4], digits = 3)`.$0,10^2$ `r brformat(coef(fit)[5], digits = 3)`.$0,10^3$ = `r brformat(coef(fit1)[1])` `r brformat((.1)^2*coef(fit)[4], digits = 3)` `r brformat((.1)^3*coef(fit)[5], digits = 3)`).
 
-Finalmente, um lote com as mesmas características do lote paradigma, porém em terreno pantanoso, segundo o modelo, vale R\$`r brformat(p6)`/$m^2$. No modelo original, vale `r brformat(p6_orig)`/$m^2$.
+Finalmente, um lote com as mesmas características do lote paradigma, porém em terreno pantanoso, segundo o modelo, vale R\$`r brformat(p6)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit1)[6])`). No modelo original, vale `r brformat(p6_orig)`/$m^2$.
 
-## Estimativas
+A tabela abaixo resume a influência de cada variável na composição do valor unitário total:
 
-Foram realizadas as estimativas dos terrenos proposto por Hochheim [-@hochheim2005, 79-80].
+| Terreno       |$V_0$                      |$Frente$                     |$Profundidade$                |$Inclinacao$                  |$Pedologia$|$VU$|
+|:--------------|--------------------------:|----------------------------:|-----------------------------:|-----------------------------:|----------:|----:|
+| Paradigma     |`r brformat(coef(fit1)[1])`| 0                           | 0                            | 0                            |0          |54,27|
+| (1)+5m frente |`r brformat(coef(fit1)[1])`|`r brformat(5*coef(fit1)[2])`| 0                            | 0                            |0          |59,25|
+| (2)+15m fundo |`r brformat(coef(fit1)[1])`| 0                           |`r brformat(15*coef(fit1)[3])`| 0                            |0          |51,59|
+| (3)=(1)+(2)   |`r brformat(coef(fit1)[1])`|`r brformat(5*coef(fit1)[2])`|`r brformat(15*coef(fit1)[3])`| 0                            |0          |56,60|
+| (4)10% aclive |`r brformat(coef(fit1)[1])`| 0|0                         |`r brformat(.10^2*coef(fit)[4] + .10^3*coef(fit)[5])`        |0          |51,47|
+| (5)10% declive|`r brformat(coef(fit1)[1])`| 0|0                         |`r brformat((-.10)^2*coef(fit)[4] + (-.10)^3*coef(fit)[5])`  |0          |53,61|
+| (6)Pantanoso  |`r brformat(coef(fit1)[1])`| 0|0                         |0                             |`r brformat(coef(fit1)[6])`   |33,16      |     
 
-### Terreno 1
+Pode-se então, baseado nestes modelos, adaptar, para posteriormente serem utilizados através do método de avaliação por fatores, o seguinte:
 
+a. Fator frente: $$C_f = 1 + \frac{0,997}{54,27}*(F_p - F_r)$$
+b. Fator profundidade: $$C_p = 1 - \frac{0,178}{54,27}*(P_e - P_r)$$
+c. Fator topografia: $$C_t = 1 - \frac{173,1.(i_r)^2 + 1071,9.(i_r)^3}{54,27}$$
+d. Fator pedologia: $$C_{pedo} = 1 - \frac{21,11}{54,25} = 0,61$$
 
-```{r}
-p1 <- 14*40*predict(fit1, 
-                    newdata = data.frame(frente = (14 - 15), 
-                                         profundidade = (40 - 30), 
-                                         inclinacao = (8 - mean_incl)/sd_incl, 
-                                         pedologia = as.factor("seco")),
-                    interval = "confidence", level = 0.80)
-p1p <- 14*40*predict(fit1, 
-                    newdata = data.frame(frente = (14 - 15), 
-                                         profundidade = (40 - 30), 
-                                         inclinacao = (8 - mean_incl)/sd_incl, 
-                                         pedologia = as.factor("seco")),
-                    interval = "prediction", level = 0.80)
-```
-
-Para o terreno 1, com 14m de frente, 40m de profundidade e aclive de 8%, foi estimado o valor central de R\$ `r brformat(p1[, "fit"])`, com limite inferior do intervalo de confiança em R\$ `r brformat(p1[, "lwr"])` e limite superior  do IC em R\$ `r brformat(p1[, "upr"])`. A amplitude do IC foi de `r porcento(amplitude(p1)/100)`., enquanto o intervalo de predição teve amplitude calculada em `r porcento(amplitude(p1p)/100)`.
-
-Em @hochheim2005, p. 79, segundo o método dos fatores multiplicativo, o valor estimado para o bem foi de R\$ 25.869,56, entre R\$ 24.551,50 e R\$ 27.182,39, ou seja, um IC com amplitude de 10,2%.
-
-Em @hochheim2005, p. 85, segundo o método dos fatores aditivo, o valor estimado para o bem foi de R\$ 25.825,18, entre R\$ 24.640,78 e R\$ 27.009,58, ou seja, um IC com amplitude de 9,2%.
-
-### Terreno 2
-
-```{r}
-p2 <- 16*50*predict(fit1, 
-                    newdata = data.frame(frente = (16 - 15), 
-                                         profundidade = (50 - 30), 
-                                         inclinacao = (-15 - mean_incl)/sd_incl, 
-                                         pedologia = as.factor("seco")), 
-                    interval = "confidence", level = 0.80)
-p2p <- 16*50*predict(fit1, 
-                    newdata = data.frame(frente = (16 - 15), 
-                                         profundidade = (50 - 30), 
-                                         inclinacao = (-15 - mean_incl)/sd_incl, 
-                                         pedologia = as.factor("seco")),
-                    interval = "prediction", level = 0.80)
-```
-
-Para o terreno 2, com 16m de frente, 50m de profundidade e declive de 15%, foi estimado o valor central de R\$ `r brformat(p2[, "fit"])`, com limite inferior do intervalo de confiança em R\$ `r brformat(p2[, "lwr"])` e limite superior  do IC em R\$ `r brformat(p2[, "upr"])`. A amplitude do IC foi de `r porcento(amplitude(p2)/100)`., enquanto o intervalo de predição teve amplitude calculada em `r porcento(amplitude(p2p)/100)`.
-
-Em @hochheim2005, p. 80, segundo o método dos fatores multiplicativo, o valor estimado para o bem foi de R\$ 32.168,78, entre R\$ 30.529,78 e R\$ 33.801,29, ou seja, um IC com amplitude de 10,2%.
-
-Em @hochheim2005, p. 86, segundo o método dos fatores aditivo, o valor estimado para o bem foi de R\$ 31.790,88, entre R\$ 30.332,88 e R\$ 33.248,88, ou seja, um IC com amplitude de 9,2%.
+| Terreno       |$C_f$    | $C_p$ | $C_t$ |$C_{pedo}$ |$C_{aval. total}$ |
+|:--------------|--------:|------:|------:|----------:|----------------:|
+| Paradigma     | 1,00    | 1,00  | 1,00  | 1,00      | 1,0             |
+| (1)+5m frente | 1,09    | 1,00  | 1,00  | 1,00      | 1,09            |
+| (2)+15m fundo | 1,00    | 0,95  | 1,00  | 1,00      | 0,95            |
+| (3)=(1)+(2)   | 1,09    | 0,95  | 1,00  | 1,00      | 1,04            |
+| (4)10% aclive | 1,00    | 1,00  | 0,95  | 1,00      | 0,95            |
+| (5)10% declive| 1,00    | 1,00  | 0,99  | 1,00      | 0,99            |
+| (6)Pantanoso  | 1,00    | 1,00  | 1,00  | 0,61      | 0,61            |
 
 # CONCLUSÃO
 
@@ -360,7 +338,7 @@ O modelo com os dados centralizados possibilitou uma melhor interpretação do m
 
 A centralização e escalonamento da variável `inclinacao` possibilitou o enquadramento do modelo no Grau I de fundamentação da NBR 14.653-02.
 
-
+O cálculo das estimativas através do método científico (modelo de regressão linear), possibilitou o correto entendimento da influência da variável `inclinacao` que, neste caso, teve comportamento diverso ao do esperado pelo método de fatores. Neste, presume-se que a variável `inclinacao` deprecie mais quando em aclive do que em situação de declive, porém, através da análise do modelo de regressão linear, o comportamento foi o contrário do esperado.  Cabe salientar que, caso o coeficiente do termo cúbico tivesse resultado positivo, a variável `inclinacao` teria comportamento similar ao comportamento esperado pelo método de fatores.
 
 # REFERÊNCIAS {-}
 
