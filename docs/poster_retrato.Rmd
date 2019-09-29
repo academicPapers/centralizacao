@@ -2,7 +2,7 @@
 main_topsize: 0.15 #percent coverage of the poster
 main_bottomsize: 0.1
 #ESSENTIALS
-title: '**Centralização e escalonamento de dados: Aplicação na Engenharia de Avaliações**'
+title: '**Centralização e escalonamento de dados na Engenharia de Avaliações**'
 subtitle: 'Aplicação na Engenharia de Avaliações'
 author:
   - name: '**Luiz Fernando Palin Droubi**'
@@ -58,7 +58,8 @@ library(knitcitations)
 > "Never estimate intercepts, always estimate _**centercepts**_! John Tukey"
 
 A centralização de dados corresponde à subtração dos dados amostrais de cada 
-variável, da sua média amostral ou outro valor característico. Matematicamente, 
+variável, da sua média amostral ou outro valor característico. O intercepto do 
+modelo, assim, pode ser melhor estimado e ganhar um significado. Matematicamente, 
 isto pode ser representado na fórmula a seguir:
 
 $$x_{ij} = x_{ij} - \bar{x_j} \qquad \forall i \in 1..n, j \in 1..p$$
@@ -74,8 +75,9 @@ A figura 1 ilustra esse processo:
 ![Figura 1: Centralização em relação à média de cada variável](center.png)
 
 Quando feita em relação à média, as variáveis centralizadas ficam com 
-média igual a zero. Isto pode ajudar na interpretação do modelo de regressão,
-especialmente quando da presença de interação entre as variáveis. 
+média igual a zero e o intercepto torna-se o *centrocepto* [@wainer]. Isto pode 
+ajudar na interpretação do modelo de regressão, especialmente quando da presença 
+de interação entre as variáveis. 
 
 Quando feita em relação à valores referenciais que estas variáveis podem assumir, 
 como os dados de um imóvel paradigma na Engenharia de Avaliações, o intercepto 
@@ -103,7 +105,7 @@ onde:
 
 A padronização dos dados pode ser importante para reduzir a multicolinearidade
 entre as variáveis independentes. Além disto, a padronização dos dados amostrais 
-pode reduzir significativamenteo erro computacional `r knitcitations::citep("10.1201/9781315119588")` devido ao arredondamento.
+pode reduzir significativamenteo erro computacional devido ao arredondamento [@Matloff_2017].
 
 Além disto, se o objetivo do modelo é a predição de valores, o ideal é que se
 mantenham o maior número de variáveis explicativas possíveis, adotando-se um 
@@ -207,7 +209,7 @@ stargazer(fit, fit1, header = FALSE, label = "tab:fits", type = "html",
 # Referências
 
 ```{r, include=FALSE}
-write.bibtex(file="references.bib")
+# write.bibtex(file="references.bib")
 knitr::write_bib(c('pagedown', 'appraiseR'), 'packages.bib')
 ```
 

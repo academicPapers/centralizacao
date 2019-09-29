@@ -8,7 +8,7 @@
 
 
 
-<title>Centralização e escalonamento de dados: Aplicação na Engenharia de Avaliações</title>
+<title>Centralização e escalonamento de dados na Engenharia de Avaliações</title>
 
 <link href="poster_retrato_files/paged-0.4/css/default.css" rel="stylesheet" />
 
@@ -366,7 +366,7 @@ span > #tab:mytable {
 
 <div class="column outer">
 <div class="section">
-<h1 id="title"><strong>Centralização e escalonamento de dados: Aplicação na Engenharia de Avaliações</strong></h1><br>
+<h1 id="title"><strong>Centralização e escalonamento de dados na Engenharia de Avaliações</strong></h1><br>
 <h3 id="author" class="author">
 
 <strong>Luiz Fernando Palin Droubi</strong><sup> 1, 2, <a class="orcid" href="https://orcid.org/0000-0002-5971-7220"><img src="https://raw.githubusercontent.com/brentthorne/posterdown/master/images/orcid.jpg"></a></sup><br>
@@ -395,7 +395,8 @@ span > #tab:mytable {
 <p>“Never estimate intercepts, always estimate <em><strong>centercepts</strong></em>! John Tukey”</p>
 </blockquote>
 <p>A centralização de dados corresponde à subtração dos dados amostrais de cada
-variável, da sua média amostral ou outro valor característico. Matematicamente,
+variável, da sua média amostral ou outro valor característico. O intercepto do
+modelo, assim, pode ser melhor estimado e ganhar um significado. Matematicamente,
 isto pode ser representado na fórmula a seguir:</p>
 <p><span class="math display">\[x_{ij} = x_{ij} - \bar{x_j} \qquad \forall i \in 1..n, j \in 1..p\]</span>
 onde:</p>
@@ -410,8 +411,9 @@ onde:</p>
 <p class="caption">Figura 1: Centralização em relação à média de cada variável</p>
 </div>
 <p>Quando feita em relação à média, as variáveis centralizadas ficam com
-média igual a zero. Isto pode ajudar na interpretação do modelo de regressão,
-especialmente quando da presença de interação entre as variáveis.</p>
+média igual a zero e o intercepto torna-se o <em>centrocepto</em> <span class="citation">(Wainer <a href="#ref-wainer">2000</a>)</span>. Isto pode
+ajudar na interpretação do modelo de regressão, especialmente quando da presença
+de interação entre as variáveis.</p>
 <p>Quando feita em relação à valores referenciais que estas variáveis podem assumir,
 como os dados de um imóvel paradigma na Engenharia de Avaliações, o intercepto
 do modelo resulta significativo, pois este representará o valor da variável
@@ -436,7 +438,7 @@ onde:</p>
 </ul>
 <p>A padronização dos dados pode ser importante para reduzir a multicolinearidade
 entre as variáveis independentes. Além disto, a padronização dos dados amostrais
-pode reduzir significativamenteo erro computacional (Matloff, 2017) devido ao arredondamento.</p>
+pode reduzir significativamenteo erro computacional devido ao arredondamento <span class="citation">(Matloff <a href="#ref-Matloff_2017">2017</a>)</span>.</p>
 <p>Além disto, se o objetivo do modelo é a predição de valores, o ideal é que se
 mantenham o maior número de variáveis explicativas possíveis, adotando-se um
 <em>cutoff</em> maior para os p-valores, entre 0,25 e 0,35 <span class="citation">(Matloff <a href="#ref-Matloff_2017">2017</a>)</span>. Como o
@@ -986,6 +988,9 @@ PAVIMENTOS4
 <div id="refs" class="references">
 <div id="ref-Matloff_2017">
 <p>Matloff, Norman. 2017. <em>Statistical Regression and Classification</em>. Chapman; Hall/CRC. <a href="https://doi.org/10.1201/9781315119588">https://doi.org/10.1201/9781315119588</a>.</p>
+</div>
+<div id="ref-wainer">
+<p>Wainer, Howard. 2000. “The Centercept: An Estimable and Meaningful Regression Parameter.” <em>Psychological Science</em> 11 (5): 434–36. <a href="http://www.jstor.org/stable/40063555">http://www.jstor.org/stable/40063555</a>.</p>
 </div>
 </div>
 </div>
