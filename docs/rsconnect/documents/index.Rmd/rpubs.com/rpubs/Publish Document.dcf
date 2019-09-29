@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/533583/9b22b56b973e4c17ae240b28846b17ff
+bundleId: https://api.rpubs.com/api/v1/document/533583/9b22b56b973e4c17ae240b28846b17ff
+url: http://rpubs.com/lfpdroubi/533583
+when: 1569762234.04037
