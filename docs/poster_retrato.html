@@ -392,10 +392,7 @@ span > #tab:mytable {
 <div id="centralizacao" class="section level1">
 <h1>Centralização</h1>
 <blockquote>
-“Never estimate intercepts, always estimate <em>centercepts</em>!”
-<footer>
-John Tukey
-</footer>
+<p>“Never estimate intercepts, always estimate <em><strong>centercepts</strong></em>! John Tukey”</p>
 </blockquote>
 <p>A centralização de dados corresponde à subtração dos dados amostrais de cada
 variável, da sua média amostral ou outro valor característico. Matematicamente,
@@ -431,17 +428,15 @@ está ilustrado na figura 2.</p>
 <img src="scaling.png" alt="Figura 2: Escalonamento da variância" />
 <p class="caption">Figura 2: Escalonamento da variância</p>
 </div>
-<p>Matematicamente, isto pode ser representado na fórmula a seguir:</p>
+<p>A seguinte expressão mostra isso matematicamente:</p>
 <p><span class="math display">\[x_{ij} = \frac{x_{ij} - \bar{x_j}}{\sigma_{x_j}} \qquad \forall i \in 1..n, j \in 1..p\]</span>
 onde:</p>
 <ul>
 <li><span class="math inline">\(\sigma_{x_j}\)</span> é o valor do desvio-padrão amostral da variável <span class="math inline">\(j\)</span>;</li>
 </ul>
 <p>A padronização dos dados pode ser importante para reduzir a multicolinearidade
-entre as variáveis independentes.</p>
-<p>Além disto, a padronização dos dados amostrais pode reduzir significativamente
-o erro computacional (Matloff, 2017) devido
-ao arredondamento.</p>
+entre as variáveis independentes. Além disto, a padronização dos dados amostrais
+pode reduzir significativamenteo erro computacional (Matloff, 2017) devido ao arredondamento.</p>
 <p>Além disto, se o objetivo do modelo é a predição de valores, o ideal é que se
 mantenham o maior número de variáveis explicativas possíveis, adotando-se um
 <em>cutoff</em> maior para os p-valores, entre 0,25 e 0,35 <span class="citation">(Matloff <a href="#ref-Matloff_2017">2017</a>)</span>. Como o
