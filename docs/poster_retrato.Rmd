@@ -28,9 +28,9 @@ affiliation:
     address: UNISUL
 main_findings:
   - "Never estimate intercepts, always estimate **_centercepts_**!"
-logoleft_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
-logoright_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
-logocenter_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/qr-code-black.png
+logoleft_name: http&#58;//www.cobreap.com.br/2019/wp-content/uploads/COBREAP-logomarca-aprovada-1.png
+logoright_name: http&#58;//www.cobreap.com.br/2019/wp-content/uploads/LOGOMARCA-COBREAP-2019-10.png
+logocenter_name: http&#58;//www.codigos-qr.com/qr/php/qr_img.php?d=https%3A%2F%2Fppgtg.ufsc.br%2F&s=8&e=m
 output: 
   posterdown::posterdown_betterport:
     self_contained: false
