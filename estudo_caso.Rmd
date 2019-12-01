@@ -8,6 +8,9 @@ author:
 - Norberto Hochheim^[UFSC, hochheim@gmail.com]
 date: "`r format(Sys.Date(), '%d/%m/%Y')`"
 output:
+  html_document:
+    fig_caption: yes
+    keep_md: yes
   pdf_document:
     includes:
       in_header: preamble.tex
@@ -16,9 +19,6 @@ output:
     number_sections: yes
     toc: no
   word_document: default
-  html_document:
-    fig_caption: yes
-    keep_md: yes
 classoption: a4paper, 12pt
 documentclass: article
 geometry: left=2cm,right=2cm,top=2.5cm,bottom=2.5cm
@@ -46,15 +46,15 @@ theme_set(theme_few())
 ```
 
 ```{r functions}
-brformat <- function(x, digits = 2, nsmall = 2, decimal.mark = ",", big.mark = ".", scientific = FALSE, ...) {
+brf <- function(x, digits = 2, nsmall = 2, decimal.mark = ",", big.mark = ".", scientific = FALSE, ...) {
   format(x, decimal.mark = decimal.mark, big.mark = big.mark, digits = digits, 
          nsmall = nsmall, scientific = scientific, ...)
 }
 br <- function(...) {
-  function(x) brformat(x, ...)
+  function(x) brf(x, ...)
 }
 reais <- function(prefix = "R$", ...) {
-  function(x) paste(prefix, brformat(x, ...), sep = "")
+  function(x) paste(prefix, brf(x, ...), sep = "")
 }
 porcento <- function (x) {
     if (length(x) == 0) 
@@ -67,11 +67,18 @@ gg_color_hue <- function(n) {
   hcl(h = hues, l = 65, c = 100)[1:n]
 }
 reciprocal_squared_trans <- function() scales::trans_new("reciprocal_squared", function(x) x^(-2), function(x) x^(-.5))
+type <- ifelse(knitr::opts_knit$get("rmarkdown.pandoc.to") == "docx",
+               "text", knitr::opts_knit$get("rmarkdown.pandoc.to"))
 ```
 
 # ESTUDO DE CASO
 
 ## Dados
+
+```{r}
+knitr::opts_knit$get("rmarkdown.pandoc.to")
+```
+
 
 Para este estudo de caso foram utilizados os dados disponíveis em Hochheim [-@hochheim2005, 74].
 
@@ -106,9 +113,9 @@ dfSummary(loteamento, plain.ascii = FALSE, style = "grid",
 
 De posse de todos os dados, sem qualquer transformação exceto a da variável `inclinacao`, por construção, foi inicialmente ajustado um primeiro modelo, apenas para o saneamento da amostra, em que foram utilizadas as variáveis `frente` e `profundidade` em detrimento da variável `area`.
 
-Os gráficos diagnósticos deste primeiro modelo podem ser vistos na figura \ref{fig:fit}. Como se pode ver nesta figura, os pontos 7 e 19 encontram-se bem afastados da média e foram excluídos do modelo final.
+Os gráficos diagnósticos deste primeiro modelo podem ser vistos na figura \ref{fig:fitplots}. Como se pode ver nesta figura, os pontos 7 e 19 encontram-se bem afastados da média e foram excluídos do modelo final.
 
-```{r fit, fig.cap="Modelo com todos os dados", out.width="30%", results='hide', fig.show='hold'}
+```{r fitplots, fig.cap="Modelo com todos os dados", out.width="30%", results='hide', fig.show='hold'}
 fit <- lm(VU ~ frente + profundidade + I(inclinacao^2) + I(inclinacao^3) +
             pedologia, data = loteamento)
 mplot(fit, which = 1:6)
@@ -141,7 +148,7 @@ mplot(fit1, which = 1:6)
 ```
 
 ```{r fits, results='asis'}
-stargazer(fit, fit1, header = FALSE, label = "tab:fits",
+stargazer(fit, fit1, type = type, header = FALSE, label = "tab:fits",
           title = "Comparacão dos modelos com e sem centralização e escalonamento.",
           decimal.mark = ",", digit.separator = ".",
           intercept.bottom = FALSE, intercept.top = TRUE,
@@ -171,8 +178,6 @@ power_plot(fit1)
 ## Coerência do modelo
 
 O modelo é coerente, conforme pode-se notar nas estimativas abaixo:
-
-
 
 ```{r}
 ### Paradigma
@@ -287,33 +292,35 @@ p6_orig <- predict(fit,
                                   pedologia = as.factor("pantanoso")
                                   )
              )
+co <- coef(fit)
+c1 <- coef(fit1)
 ```
 
-Segundo o modelo, o lote paradigma vale R\$`r brformat(p)`/$m^2$, o que é muito próximo do intercepto do modelo final (R\$ `r brformat(coef(fit1)[1])`/$m^2$). Apenas para efeito de comparação, o mesmo lote paradigma avaliado de acordo com o modelo com os dados originais vale `r brformat(p_orig)`/$m^2$.
+Segundo o modelo, o lote paradigma vale R\$`r brf(p)`/$m^2$, o que é muito próximo do intercepto do modelo final (R\$ `r brf(c1[1])`/$m^2$). Apenas para efeito de comparação, o mesmo lote paradigma avaliado de acordo com o modelo com os dados originais vale `r brf(p_orig)`/$m^2$.
 
-Um lote com as mesmas características do lote paradigma, porém com 5m a mais de frente, segundo o modelo, vale R\$`r brformat(p1)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` + `r brformat(coef(fit1)[2], digits = 3)`.5m). No modelo original, vale `r brformat(p1_orig)`/$m^2$.
+Um lote com as mesmas características do lote paradigma, porém com 5m a mais de frente, segundo o modelo, vale R\$`r brf(p1)`/$m^2$ ($\approx$ `r brf(c1[1])` + `r brf(c1[2], digits = 3)`.5m). No modelo original, vale `r brf(p1_orig)`/$m^2$.
 
-Um lote com as mesmas características do lote paradigma, porém com 45m de profundidade, segundo o modelo, vale R\$`r brformat(p2)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit1)[3], digits = 3)`.15m). No modelo original, vale `r brformat(p2_orig)`/$m^2$.
+Um lote com as mesmas características do lote paradigma, porém com 45m de profundidade, segundo o modelo, vale R\$`r brf(p2)`/$m^2$ ($\approx$ `r brf(c1[1])` `r brf(c1[3], digits = 3)`.15m). No modelo original, vale `r brf(p2_orig)`/$m^2$.
 
-Um lote com as mesmas características do lote paradigma, porém com 20m de frente e 45m de profundidade, segundo o modelo, vale R\$`r brformat(p3)`/$m^2$. No modelo original, vale `r brformat(p3_orig)`/$m^2$.
+Um lote com as mesmas características do lote paradigma, porém com 20m de frente e 45m de profundidade, segundo o modelo, vale R\$`r brf(p3)`/$m^2$. No modelo original, vale `r brf(p3_orig)`/$m^2$.
 
-Um lote com as mesmas características do lote paradigma, porém com declive de 10%, segundo o modelo, vale R\$`r brformat(p4)`/$m^2$ . No modelo original, vale `r brformat(p4_orig)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit)[4], digits = 3)`.$(-0,10)^2$ `r brformat(coef(fit)[5], digits = 3)`.$(-0,10)^3$ = `r brformat(coef(fit1)[1])` `r brformat((-.1)^2*coef(fit)[4], digits = 3)` + `r brformat((-.1)^3*coef(fit)[5], digits = 3)`).
+Um lote com as mesmas características do lote paradigma, porém com declive de 10%, segundo o modelo, vale R\$`r brf(p4)`/$m^2$ . No modelo original, vale `r brf(p4_orig)`/$m^2$ ($\approx$ `r brf(c1[1])` `r brf(co[4], digits = 3)`.$(-0,10)^2$ `r brf(co[5], digits = 3)`.$(-0,10)^3$ = `r brf(c1[1])` `r brf((-.1)^2*co[4], digits = 3)` + `r brf((-.1)^3*co[5], digits = 3)`).
 
-Um lote com as mesmas características do lote paradigma, porém com aclive de 10%, segundo o modelo, vale R\$`r brformat(p5)`/$m^2$ . No modelo original, vale `r brformat(p5_orig)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit)[4], digits = 3)`.$0,10^2$ `r brformat(coef(fit)[5], digits = 3)`.$0,10^3$ = `r brformat(coef(fit1)[1])` `r brformat((.1)^2*coef(fit)[4], digits = 3)` `r brformat((.1)^3*coef(fit)[5], digits = 3)`).
+Um lote com as mesmas características do lote paradigma, porém com aclive de 10%, segundo o modelo, vale R\$`r brf(p5)`/$m^2$ . No modelo original, vale `r brf(p5_orig)`/$m^2$ ($\approx$ `r brf(c1[1])` `r brf(co[4], digits = 3)`.$0,10^2$ `r brf(co[5], digits = 3)`.$0,10^3$ = `r brf(c1[1])` `r brf((.1)^2*co[4], digits = 3)` `r brf((.1)^3*co[5], digits = 3)`).
 
-Finalmente, um lote com as mesmas características do lote paradigma, porém em terreno pantanoso, segundo o modelo, vale R\$`r brformat(p6)`/$m^2$ ($\approx$ `r brformat(coef(fit1)[1])` `r brformat(coef(fit1)[6])`). No modelo original, vale `r brformat(p6_orig)`/$m^2$.
+Finalmente, um lote com as mesmas características do lote paradigma, porém em terreno pantanoso, segundo o modelo, vale R\$`r brf(p6)`/$m^2$ ($\approx$ `r brf(c1[1])` `r brf(c1[6])`). No modelo original, vale `r brf(p6_orig)`/$m^2$.
 
 A tabela abaixo resume a influência de cada variável na composição do valor unitário total:
 
-| Terreno       |$V_0$                      |$Frente$                     |$Profundidade$                |$Inclinacao$                  |$Pedologia$|$VU$|
-|:--------------|--------------------------:|----------------------------:|-----------------------------:|-----------------------------:|----------:|----:|
-| Paradigma     |`r brformat(coef(fit1)[1])`| 0                           | 0                            | 0                            |0          |54,27|
-| (1)+5m frente |`r brformat(coef(fit1)[1])`|`r brformat(5*coef(fit1)[2])`| 0                            | 0                            |0          |59,25|
-| (2)+15m fundo |`r brformat(coef(fit1)[1])`| 0                           |`r brformat(15*coef(fit1)[3])`| 0                            |0          |51,59|
-| (3)=(1)+(2)   |`r brformat(coef(fit1)[1])`|`r brformat(5*coef(fit1)[2])`|`r brformat(15*coef(fit1)[3])`| 0                            |0          |56,60|
-| (4)10% aclive |`r brformat(coef(fit1)[1])`| 0|0                         |`r brformat(.10^2*coef(fit)[4] + .10^3*coef(fit)[5])`        |0          |51,47|
-| (5)10% declive|`r brformat(coef(fit1)[1])`| 0|0                         |`r brformat((-.10)^2*coef(fit)[4] + (-.10)^3*coef(fit)[5])`  |0          |53,61|
-| (6)Pantanoso  |`r brformat(coef(fit1)[1])`| 0|0                         |0                             |`r brformat(coef(fit1)[6])`   |33,16      |     
+| Terreno       |$V_0$         |$Frente$        |$Profundidade$    |$Inclinacao$                    |$Pedologia$   |$VU$ |
+|:--------------|-------------:|---------------:|-----------------:|-------------------------------:|-------------:|----:|
+| Paradigma     |`r brf(c1[1])`| 0              | 0                | 0                              |0             |54,27|
+| (1)+5m frente |`r brf(c1[1])`|`r brf(5*c1[2])`| 0                | 0                              |0             |59,25|
+| (2)+15m fundo |`r brf(c1[1])`| 0              |`r brf(15*c1[3])` | 0                              |0             |51,59|
+| (3)=(1)+(2)   |`r brf(c1[1])`|`r brf(5*c1[2])`|`r brf(15*c1[3])` | 0                              |0             |56,60|
+| (4)10% aclive |`r brf(c1[1])`| 0              |0                 |`r brf(.01*co[4]+.0001*co[5])`  |0             |51,47|
+| (5)10% declive|`r brf(c1[1])`| 0              |0                 |`r brf(-.01*co[4]+-.0001*co[5])`|0             |53,61|
+| (6)Pantanoso  |`r brf(c1[1])`| 0              |0                 |0                               |`r brf(c1[6])`|33,16|     
 
 Pode-se então, baseado nestes modelos, adaptar, para posteriormente serem utilizados através do método de avaliação por fatores, o seguinte:
 
@@ -322,38 +329,113 @@ b. Fator profundidade: $$C_p = 1 - \frac{0,178}{54,27}*(P_e - P_r)$$
 c. Fator topografia: $$C_t = 1 - \frac{173,1.(i_r)^2 + 1071,9.(i_r)^3}{54,27}$$
 d. Fator pedologia: $$C_{pedo} = 1 - \frac{21,11}{54,25} = 0,61$$
 
+É interessante notar que, para os termos polinomiais da variável `inclinacao`, para o estabelecimentos dos fatores, foram utilizados os coeficientes do primeiro modelo. Isto só foi possível porque a média da variável `inclinacao` já era muito próxima de zero. Desta maneira, a diferença entre a adoção dos coeficientes do segundo modelo e os coeficientes do primeiro modelo, na elaboração dos fatores, é irrisória. No entanto, a facilidade de obtenção dos fatores com o primeiro modelo é muito maior, e o resultado muito mais elegante, razões da adoção, então, dos coeficientes do primeiro modelo.
+
 | Terreno       |$C_f$    | $C_p$ | $C_t$ |$C_{pedo}$ |$C_{aval. total}$ |
 |:--------------|--------:|------:|------:|----------:|-----------------:|
-| Paradigma     | 1,00    | 1,00  | 1,00  | 1,00      | 1,0              |
-| (1)+5m frente | 1,09    | 1,00  | 1,00  | 1,00      | 1,09             |
-| (2)+15m fundo | 1,00    | 0,95  | 1,00  | 1,00      | 0,95             |
-| (3)=(1)+(2)   | 1,09    | 0,95  | 1,00  | 1,00      | 1,04             |
-| (4)10% aclive | 1,00    | 1,00  | 0,95  | 1,00      | 0,95             |
-| (5)10% declive| 1,00    | 1,00  | 0,99  | 1,00      | 0,99             |
-| (6)Pantanoso  | 1,00    | 1,00  | 1,00  | 0,61      | 0,61             |
+| (1)Paradigma  | 1,00    | 1,00  | 1,00  | 1,00      | 1,00             |
+| (2)+5m frente | 1,09    | 1,00  | 1,00  | 1,00      | 1,09             |
+| (3)+15m fundo | 1,00    | 0,95  | 1,00  | 1,00      | 0,95             |
+| (4)=(2)+(3)   | 1,09    | 0,95  | 1,00  | 1,00      | 1,04             |
+| (5)10% aclive | 1,00    | 1,00  | 0,95  | 1,00      | 0,95             |
+| (6)10% declive| 1,00    | 1,00  | 0,99  | 1,00      | 0,99             |
+| (7)Pantanoso  | 1,00    | 1,00  | 1,00  | 0,61      | 0,61             |
 
-## Estudo de caso n.º2
+## Estudo de caso n.º 2
+
+Para este segundo estudo de caso foram aplicados dados reais de mercado no bairro Jurerê em Florianópolis de julho/2017.
 
 ```{r}
 jurere <- readxl::read_excel("jurere.xls")
-mean_dist_mar <- mean(jurere$DIST_MAR)
-sd_dist_mar <- sd(jurere$DIST_MAR)
+jurere$PAVIMENTOS <- as.factor(jurere$PAVIMENTOS)
 jurere$PROFUNDIDADE <- with(jurere, AREA/TESTADA)
-jurere$AREA <- as.vector(scale(jurere$AREA, center = 600, scale = FALSE))
-jurere$TESTADA <- as.vector(scale(jurere$TESTADA, center = 20, scale = FALSE))
-jurere$PROFUNDIDADE <- as.vector(scale(jurere$PROFUNDIDADE, center = 30, scale = FALSE))
-jurere$DIST_MAR <- as.vector(scale(jurere$DIST_MAR, center = TRUE, scale = TRUE))
-fit <- lm(VU ~  I(AREA^2) + TESTADA + DIST_MAR + as.factor(PAVIMENTOS), 
-          data = jurere, subset = -27)
-summary(fit)
 ```
 
-```{r}
-newdata = data.frame(AREA = (600 - 600), TESTADA = (20 - 20), 
-                     PROFUNDIDADE = (30-30), DIST_MAR = (1094 - mean_dist_mar)/sd_dist_mar, 
-                     PAVIMENTOS = as.factor(2))
-predict(fit, newdata = newdata)
+
+```{r, results='asis'}
+dfSummary(jurere[, 2:13], plain.ascii = FALSE, style = "grid", 
+          graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp")
 ```
+
+Neste caso, o lote paradigma é um terreno com 450$m^2$ com 15m de testada, em situação de meio de quadra, o que foi modelado pela variável dicotômica `ESQUINA` (0 ou 1). As variáveis `AREA` e `TESTADA` foram centralizadas nestes valores. Já a variável `DIST_MAR` foi centralizada a 500m do mar, valor próximo da média amostral. Além das variáveis numéricas citadas, foi utilizada a variável `PAVIMENTOS` (dicotômica), que representa o número de pavimentos viável estabelecido para o local do imóvel (2 ou 4). 
+
+```{r}
+fit <- lm(VU ~  I(AREA^2) + TESTADA + DIST_MAR + PAVIMENTOS, 
+          data = jurere, subset = -27)
+jurere$AREA <- as.vector(scale(jurere$AREA, center = 450, scale = FALSE))
+jurere$TESTADA <- as.vector(scale(jurere$TESTADA, center = 15, scale = FALSE))
+jurere$PROFUNDIDADE <- as.vector(scale(jurere$PROFUNDIDADE, center = 30, scale = FALSE))
+jurere$DIST_MAR <- as.vector(scale(jurere$DIST_MAR, center = 500, scale = FALSE))
+fit1 <- lm(VU ~  I(AREA^2) + TESTADA + DIST_MAR + PAVIMENTOS, 
+          data = jurere, subset = -27)
+c1 <- coef(fit1)
+#summary(fit)
+```
+
+As principais estatísticas dos modelos com e sem centralização podem ser vistas na tabela \ref{tab:fitsjurere}. Mais uma vez, os dois modelos se equivalem. 
+
+```{r fitsjurere, results='asis'}
+stargazer(fit, fit1, type = "text", header = FALSE, label = "tab:fitsjurere",
+          title = "Modelo para terrenos no bairro Jurerê (2017).",
+          decimal.mark = ",", digit.separator = ".",
+          intercept.bottom = FALSE, intercept.top = TRUE,
+          report = "vcstp*", star.cutoffs = c(0.30, 0.20, 0.10))
+```
+
+```{r pplot2, fig.cap = "Poder de predição do modelo (Jurerê)."}
+power_plot(fit1)
+```
+
+Desta maneira, novamente conseguiu-se dar interpretação ao intercepto do modelo.
+
+Outra vantagem da centralização é a redução da multicolinearidade do modelo. No primeiro modelo, sem centralização, as variáveis `AREA` e `TESTADA` apresentam maior grau de colinearidade do que no modelo com as variáveis centralizadas, usando o critério do fator de inflacionamento da variância.
+
+```{r}
+vif(fit)
+vif(fit1)
+```
+Para este caso em específico, apesar dos altos valores dos fatores, a multicolineariedade não era um problema concreto, mas é significativa a diminuição da inflação da variância com o modelo centralizado. Isto pode ser importante em outras situações.
+
+Analogamente ao primeiro caso, com o auxílio do modelo foram ajustados os seguintes fatores:
+
+a. Fator Área: $$C_A = 1 - \frac{2,014.10^{-3}}{2.065,37}*(A - A_r)^2$$
+b. Fator Frente: $$C_f = 1 + \frac{100,51}{2.065,37}*(F_p - F_r)$$
+c. Fator Localização: $$C_l = 1 - \frac{2,09}{2.065,37}*(D - D_r)$$
+d. Fator Incorporação: $$C_i = 1 + \frac{1.912,31}{2.065,37} = 1,925$$
+
+```{r}
+p <- predict(fit, 
+             newdata = data.frame(AREA = 450, TESTADA = 15, DIST_MAR = 500, 
+                                  PAVIMENTOS = as.factor(2)), 
+             interval = "confidence", level = 0.80)
+newdata = data.frame(AREA = (450 - 450), TESTADA = (15 - 15), 
+                     PROFUNDIDADE = (30-30), DIST_MAR = (500 - 500), 
+                     PAVIMENTOS = as.factor(2), ESQUINA = 0)
+p1 <- predict(fit1, newdata = newdata, interval = "confidence", level = 0.80)
+newdata$AREA <- 100
+p2 <- predict(fit1, newdata = newdata, interval = "confidence", level = 0.80)
+newdata$AREA <- 0
+newdata$TESTADA <- 5
+p3 <- predict(fit1, newdata = newdata, interval = "confidence", level = 0.80)
+newdata$AREA <- 100
+p4 <- predict(fit1, newdata = newdata, interval = "confidence", level = 0.80)
+newdata$AREA <- 0
+newdata$TESTADA <- 0
+newdata$DIST_MAR <- (33-500)
+p5 <- predict(fit1, newdata = newdata, interval = "confidence", level = 0.80)
+newdata$DIST_MAR <- 0
+newdata$PAVIMENTOS <- as.factor(4)
+p6 <- predict(fit1, newdata = newdata, interval = "confidence", level = 0.80)
+```
+
+| Terreno        |$C_A$ | $C_f$ | $C_l$ |$C_{i}$    |$C_{aval. total}$ |
+|:---------------|-----:|------:|------:|----------:|-----------------:|
+| (1)Paradigma   | 1,00 | 1,00  | 1,00  | 1,00      | 1,00             |
+| (2)+100m2 área | 0,99 | 1,00  | 1,00  | 1,00      | 0,99             |
+| (3)+5m frente  | 1,00 | 1,24  | 1,00  | 1,00      | 1,24             |
+| (4)=(2)+(3)    | 0,99 | 1,24  | 1,00  | 1,00      | 1,23             |
+| (5)33m do mar  | 1,00 | 1,00  | 1,47  | 1,00      | 1,47             |
+| (6)viab. 4 pav.| 1,00 | 1,00  | 1,00  | 1,925     | 1,925            |
 
 # CONCLUSÃO
 
@@ -362,6 +444,8 @@ O modelo com os dados centralizados possibilitou uma melhor interpretação do m
 A centralização e escalonamento da variável `inclinacao` possibilitou o enquadramento do modelo no Grau I de fundamentação da NBR 14.653-02.
 
 O cálculo das estimativas através do método científico (modelo de regressão linear), possibilitou o correto entendimento da influência da variável `inclinacao` que, neste caso, teve comportamento diverso ao do esperado pelo método de fatores. Neste, presume-se que a variável `inclinacao` deprecie mais quando em aclive do que em situação de declive, porém, através da análise do modelo de regressão linear, o comportamento foi o contrário do esperado.  Cabe salientar que, caso o coeficiente do termo cúbico tivesse resultado positivo, a variável `inclinacao` teria comportamento similar ao comportamento esperado pelo método de fatores.
+
+Com respeito ao modelo de Jurerê, mostrou-se que o método também se aplica em dados que apresentam outras características, sendo facilmente aplicável na elaboração de plantas de valores genéricos e no cálculo dos coeficientes de avaliação/homogeneização usados tradicionalmente pelas prefeituras para cálculo do valor base para cobrança do Imposto Predial e Territorial Urbano (IPTU).
 
 # REFERÊNCIAS {-}
 
